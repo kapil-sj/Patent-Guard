@@ -37,6 +37,13 @@ contract PatentGuard {
         address indexed newOwner
     );
 
+    event InnovationUpdated(
+        uint256 indexed id,
+        string newTitle,
+        string newDescription,
+        uint256 timestamp
+    );
+
     /**
      * @notice Register a new innovation
      * @param _title The title of the innovation
@@ -104,5 +111,39 @@ contract PatentGuard {
     {
         return ownerInnovations[_owner];
     }
-}
 
+    /**
+     * @notice Update innovation title and description
+     * @param _innovationId The ID of the innovation to update
+     * @param _newTitle New title
+     * @param _newDescription New description
+     */
+    function updateInnovationDetails(
+        uint256 _innovationId,
+        string calldata _newTitle,
+        string calldata _newDescription
+    ) external {
+        Innovation storage innovation = innovations[_innovationId];
+        require(innovation.owner == msg.sender, "Only the owner can update details");
+
+        innovation.title = _newTitle;
+        innovation.description = _newDescription;
+        innovation.timestamp = block.timestamp;
+
+        emit InnovationUpdated(_innovationId, _newTitle, _newDescription, block.timestamp);
+    }
+
+    /**
+     * @notice Verify if an address is the current owner of an innovation
+     * @param _innovationId Innovation ID to verify
+     * @param _address Address to check
+     * @return True if the address is the current owner
+     */
+    function verifyOwnership(uint256 _innovationId, address _address)
+        external
+        view
+        returns (bool)
+    {
+        return innovations[_innovationId].owner == _address;
+    }
+}
